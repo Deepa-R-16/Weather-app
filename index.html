@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Premium Weather App</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
+        integrity="sha512-9usAa10IRO0HhonpyAIVpjrylPvoDwiPUiKdWk5t3PyolY1cOd4DSE0Ga+ri4AuTroPR5aQvXU9xC6qOPnzFeg=="
+        crossorigin="anonymous" referrerpolicy="no-referrer" />
+</head>
+
+<body>
+    <!-- Auth Overlay (Login Screen) -->
+    <div id="auth-overlay" class="auth-overlay">
+        <div class="auth-card glass-panel">
+            <div class="auth-header">
+                <h1>Weather<span class="highlight">Now</span></h1>
+                <p>Your premium weather companion</p>
+            </div>
+            <form id="login-form">
+                <div class="input-group">
+                    <i class="fas fa-user"></i>
+                    <input type="text" id="auth-name" placeholder="Full Name" required autocomplete="name">
+                </div>
+                <div class="input-group">
+                    <i class="fas fa-envelope"></i>
+                    <input type="text" id="auth-contact" placeholder="Email or Mobile Number" required
+                        autocomplete="email">
+                </div>
+                <button type="submit" class="primary-btn full-width-btn">Get Started <i
+                        class="fas fa-arrow-right"></i></button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Main Dashboard (Hidden by default) -->
+    <div id="dashboard-container" class="dashboard-container hidden">
+        <!-- Sidebar Navigation -->
+        <aside class="sidebar">
+            <div class="logo">
+                <h2>Weather<span class="highlight">Now</span></h2>
+            </div>
+
+            <div class="search-wrapper">
+                <div class="search-box">
+                    <i class="fas fa-search search-icon"></i>
+                    <input type="text" id="city-input" placeholder="Search city..." autocomplete="off">
+                    <button id="voice-search-btn" class="icon-btn-small" title="Voice"><i
+                            class="fas fa-microphone"></i></button>
+                </div>
+                <!-- Location Button -->
+                <button id="location-btn" class="sidebar-btn full-width">
+                    <i class="fas fa-location-arrow"></i> Use Current Location
+                </button>
+                <ul id="suggestions-list" class="suggestions-list hidden"></ul>
+            </div>
+
+            <nav class="nav-menu">
+                <h3>My Cities</h3>
+                <ul id="favorites-list" class="nav-list">
+                    <!-- Favorites injected here -->
+                    <li class="placeholder-text">No favorites added yet.</li>
+                </ul>
+
+                <h3>Recent</h3>
+                <ul id="history-list" class="nav-list">
+                    <!-- History injected here -->
+                </ul>
+            </nav>
+
+            <div class="sidebar-footer">
+                <div class="user-profile" id="user-profile-section">
+                    <div class="avatar"><i class="fas fa-user"></i></div>
+                    <span id="user-name-display">Guest</span>
+                </div>
+                <div class="settings-row">
+                    <button id="theme-toggle" class="icon-btn" title="Toggle Theme"><i class="fas fa-moon"></i></button>
+                    <button id="login-btn" class="icon-btn" title="Edit Profile"><i class="fas fa-cog"></i></button>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Content Area -->
+        <main class="main-content">
+            <!-- Settings Modal -->
+            <div id="settings-modal" class="modal hidden">
+                <div class="modal-content glass-panel settings-panel">
+                    <span class="close-modal">&times;</span>
+                    <h3>Settings</h3>
+
+                    <div class="settings-group">
+                        <h4>Profile</h4>
+                        <div class="input-row">
+                            <input type="text" id="settings-name-input" placeholder="Display Name">
+                            <button id="save-profile-btn" class="icon-btn-small" title="Save Name"><i
+                                    class="fas fa-check"></i></button>
+                        </div>
+                    </div>
+
+                    <div class="settings-group">
+                        <h4>Preferences</h4>
+                        <div class="toggle-row">
+                            <span>Temperature Unit</span>
+                            <button id="unit-toggle-btn" class="toggle-btn">°C</button>
+                        </div>
+                    </div>
+
+                    <div class="settings-group">
+                        <h4>Data</h4>
+                        <button id="clear-history-btn" class="secondary-btn full-width">Clear Search History</button>
+                        <button id="clear-favorites-btn" class="secondary-btn full-width" style="margin-top: 5px;">Clear
+                            Favorites</button>
+                    </div>
+
+                    <div class="settings-group danger-zone">
+                        <h4>Account</h4>
+                        <button id="logout-btn" class="danger-btn full-width">
+                            <i class="fas fa-sign-out-alt"></i> Logout
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div id="error-message" class="toast hidden">
+                <i class="fas fa-exclamation-circle"></i>
+                <span id="error-text">Error message</span>
+            </div>
+
+            <div id="loading-indicator" class="overlay hidden">
+                <div class="spinner"></div>
+            </div>
+
+            <!-- Weather Dashboard -->
+            <div id="weather-dashboard" class="dashboard-grid hidden">
+
+                <!-- 1. Hero Section (Current Weather) -->
+                <section class="hero-card glass-panel">
+                    <div class="hero-header">
+                        <div>
+                            <h1 id="city-name">--</h1>
+                            <p id="date">--</p>
+                        </div>
+                        <button id="add-favorite-btn" class="icon-btn" title="Add to Favorites"><i
+                                class="far fa-heart"></i></button>
+                    </div>
+
+                    <div class="hero-body">
+                        <div class="hero-temp-group">
+                            <span id="temperature">--</span>
+                            <span class="degree">°</span>
+                        </div>
+                        <div class="hero-icon-group">
+                            <div class="weather-icon-container">
+                                <i class="fas fa-cloud-sun" id="weather-icon-placeholder"></i>
+                            </div>
+                            <p id="condition">--</p>
+                            <p id="feels-like">Feels like --°</p>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- 2. Highlights Grid -->
+                <section class="highlights-grid">
+                    <div class="highlight-card glass-panel">
+                        <p class="card-title">UV Index & AQI</p>
+                        <div class="card-content">
+                            <div class="gauge">
+                                <span id="aqi-value" class="gauge-value">--</span>
+                                <span class="gauge-label">AQI</span>
+                            </div>
+                            <p id="aqi-text" class="sub-text">Good</p>
+                        </div>
+                    </div>
+
+                    <div class="highlight-card glass-panel">
+                        <p class="card-title">Sunrise & Sunset</p>
+                        <div class="card-content sun-cycle">
+                            <div class="sun-item">
+                                <i class="fas fa-sun up"></i>
+                                <div>
+                                    <p>Sunrise</p>
+                                    <span id="sunrise">--:--</span>
+                                </div>
+                            </div>
+                            <div class="sun-item">
+                                <i class="fas fa-moon down"></i>
+                                <div>
+                                    <p>Sunset</p>
+                                    <span id="sunset">--:--</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="highlight-card glass-panel">
+                        <p class="card-title">Wind Status</p>
+                        <div class="card-content">
+                            <span id="wind-speed" class="big-value">--</span> <span class="unit">km/h</span>
+                            <div class="compass">
+                                <i class="far fa-compass"></i>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="highlight-card glass-panel">
+                        <p class="card-title">Humidity</p>
+                        <div class="card-content">
+                            <span id="humidity" class="big-value">--%</span>
+                            <div class="progress-bar-bg">
+                                <div class="progress-bar-fill" id="humidity-bar" style="width: 0%"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="highlight-card glass-panel">
+                        <p class="card-title">Visibility</p>
+                        <div class="card-content">
+                            <span id="visibility" class="big-value">--</span> <span class="unit">km</span>
+                        </div>
+                    </div>
+
+                    <div class="highlight-card glass-panel">
+                        <p class="card-title">Pressure</p>
+                        <div class="card-content">
+                            <span id="pressure" class="big-value">--</span> <span class="unit">hPa</span>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- 3. Forecasts -->
+                <section class="forecast-column">
+                    <div class="hourly-panel glass-panel">
+                        <h3>Hourly Forecast</h3>
+                        <div id="hourly-forecast" class="scroll-container">
+                            <!-- Injected -->
+                        </div>
+                    </div>
+
+                    <div class="daily-panel glass-panel">
+                        <h3>7-Day Forecast</h3>
+                        <div id="daily-forecast" class="list-container">
+                            <!-- Injected -->
+                        </div>
+                    </div>
+                </section>
+            </div>
+
+            <!-- Empty State -->
+            <div id="welcome-message" class="welcome-container glass-panel">
+                <h1>Welcome to WeatherNow</h1>
+                <p>Search for a city or use your location to get started.</p>
+                <div class="welcome-icon"><i class="fas fa-cloud-sun-rain"></i></div>
+            </div>
+
+        </main>
+    </div>
+    <script src="script.js"></script>
+</body>
+
+</html>
